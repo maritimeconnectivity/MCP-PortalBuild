@@ -595,7 +595,7 @@ var SrViewModelService = (function () {
     }
     SrViewModelService.prototype.ngOnInit = function () {
     };
-    SrViewModelService.prototype.generateLabelValuesForSpecification = function (specification) {
+    SrViewModelService.prototype.generateLabelValuesForSpecification = function (specification, organizationName) {
         var labelValues = undefined;
         if (specification) {
             labelValues = [];
@@ -603,11 +603,12 @@ var SrViewModelService = (function () {
             labelValues.push({ label: 'Name', valueHtml: specification.name });
             labelValues.push({ label: 'Version', valueHtml: specification.version });
             labelValues.push({ label: 'Status', valueHtml: specification.status });
+            labelValues.push({ label: 'Organization', valueHtml: organizationName });
             labelValues.push({ label: 'Description', valueHtml: specification.description });
         }
         return labelValues;
     };
-    SrViewModelService.prototype.generateLabelValuesForDesign = function (design) {
+    SrViewModelService.prototype.generateLabelValuesForDesign = function (design, organizationName) {
         var labelValues = undefined;
         if (design) {
             labelValues = [];
@@ -615,11 +616,12 @@ var SrViewModelService = (function () {
             labelValues.push({ label: 'Name', valueHtml: design.name });
             labelValues.push({ label: 'Version', valueHtml: design.version });
             labelValues.push({ label: 'Status', valueHtml: design.status });
+            labelValues.push({ label: 'Organization', valueHtml: organizationName });
             labelValues.push({ label: 'Description', valueHtml: design.description });
         }
         return labelValues;
     };
-    SrViewModelService.prototype.generateLabelValuesForInstance = function (instance) {
+    SrViewModelService.prototype.generateLabelValuesForInstance = function (instance, organizationName) {
         var labelValues = undefined;
         if (instance) {
             labelValues = [];
@@ -627,6 +629,7 @@ var SrViewModelService = (function () {
             labelValues.push({ label: 'Name', valueHtml: instance.name });
             labelValues.push({ label: 'Version', valueHtml: instance.version });
             labelValues.push({ label: 'Status', valueHtml: instance.status });
+            labelValues.push({ label: 'Organization', valueHtml: organizationName });
             labelValues.push({ label: 'Description', valueHtml: instance.description });
             labelValues.push({ label: 'Service endpoint', valueHtml: instance.endpointUri });
         }
@@ -719,6 +722,122 @@ exports.CertificateIssueNewComponent = CertificateIssueNewComponent;
 /***/ function(module, exports) {
 
 module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"Issue new certificate\" baCardClass=\"with-scroll table-panel\">\r\n      <!-- Before issue -->\r\n      <div *ngIf=\"entityType != null && !pemCertificate && !isLoading\">\r\n        <h5>Issuing a new certificate for:</h5>\r\n        <mc-label-value-table [isLoading]=\"isLoading\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n        <ul *ngIf=\"entityType != null\" class=\"btn-list clearfix\">\r\n          <li>\r\n            <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"issueNew()\">Issue Certificate</button>\r\n          </li>\r\n          <li>\r\n            <button type=\"button\" class=\"btn btn-default btn-raised\" (click)=\"cancel()\">Cancel</button>\r\n          </li>\r\n        </ul>\r\n      </div>\r\n\r\n      <sk-fading-circle [isRunning]=\"isLoading\" ></sk-fading-circle>\r\n\r\n      <!-- After issue and success -->\r\n      <div *ngIf=\"pemCertificate\">\r\n        Certificate issued with success\r\n        <ul *ngIf=\"entityType != null\" class=\"btn-list clearfix\">\r\n          <li>\r\n            <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"zipAndDownload()\">Download certificate</button>\r\n          </li>\r\n          <li>\r\n            <button type=\"button\" class=\"btn btn-default btn-raised\" (click)=\"cancel()\">OK</button>\r\n          </li>\r\n        </ul>\r\n      </div>\r\n    </ba-card>\r\n  </div>\r\n</div>\r\n"
+
+/***/ },
+
+/***/ "./src/app/pages/shared/components/certificate-revoke/certificate-revoke.component.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var mc_notifications_service_1 = __webpack_require__("./src/app/shared/mc-notifications.service.ts");
+var navigation_helper_service_1 = __webpack_require__("./src/app/shared/navigation-helper.service.ts");
+var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
+var certificate_helper_service_1 = __webpack_require__("./src/app/pages/shared/services/certificate-helper.service.ts");
+var certificates_service_1 = __webpack_require__("./src/app/backend-api/identity-registry/services/certificates.service.ts");
+var forms_1 = __webpack_require__("./node_modules/@angular/forms/index.js");
+var mcFormControlModel_1 = __webpack_require__("./src/app/theme/components/mcForm/mcFormControlModel.ts");
+var select_validator_1 = __webpack_require__("./src/app/theme/validators/select.validator.ts");
+var CertificateRevokeComponent = (function () {
+    function CertificateRevokeComponent(certificateHelper, formBuilder, certificateService, route, navigationHelper, notificationService) {
+        this.certificateHelper = certificateHelper;
+        this.formBuilder = formBuilder;
+        this.certificateService = certificateService;
+        this.route = route;
+        this.navigationHelper = navigationHelper;
+        this.notificationService = notificationService;
+        this.isRevoking = false;
+        this.revokeTitle = "Revoke";
+    }
+    CertificateRevokeComponent.prototype.ngOnInit = function () {
+        this.isLoading = true;
+        var entityType = this.route.snapshot.queryParams[navigation_helper_service_1.queryKeys.ENTITY_TYPE];
+        var entityMrn = this.route.snapshot.queryParams[navigation_helper_service_1.queryKeys.ENTITY_MRN];
+        var entityTitle = this.route.snapshot.queryParams[navigation_helper_service_1.queryKeys.ENTITY_TITLE];
+        var certificateId = this.route.snapshot.queryParams[navigation_helper_service_1.queryKeys.CERT_ID];
+        if (entityType == null || !entityMrn || !entityTitle) {
+            this.notificationService.generateNotification("Error", "Unresolved state when trying to revoke certificate", mc_notifications_service_1.MCNotificationType.Error);
+            this.navigationHelper.takeMeHome();
+        }
+        this.entityMrn = entityMrn;
+        this.entityTitle = entityTitle;
+        this.entityType = +entityType; // +-conversion from string to int
+        this.certificateId = certificateId;
+        this.generateLabelValues();
+        this.generateForm();
+        this.isLoading = false;
+    };
+    CertificateRevokeComponent.prototype.revoke = function () {
+        var _this = this;
+        this.isRevoking = true;
+        var revokeDate = this.revokeForm.value.revokedAt;
+        var tempRevocationReason = this.revokeForm.value.revocationReason;
+        var revocationReason = null;
+        if (tempRevocationReason && tempRevocationReason.toLowerCase().indexOf('undefined') < 0) {
+            revocationReason = tempRevocationReason;
+        }
+        console.log("SSS: ", revokeDate.valueOf());
+        var certificateRevocation = { revokationReason: revocationReason, revokedAt: '1499925534000' }; //revokeDate.valueOf()}
+        this.certificateService.revokeCertificate(this.entityType, this.entityMrn, this.certificateId, certificateRevocation).subscribe(function (_) {
+            _this.isRevoking = false;
+            _this.navigationHelper.cancelNavigateCertificates();
+        }, function (err) {
+            _this.isRevoking = false;
+            _this.notificationService.generateNotification('Error', 'Error when trying to revoke certificate', mc_notifications_service_1.MCNotificationType.Error, err);
+        });
+    };
+    CertificateRevokeComponent.prototype.cancel = function () {
+        this.navigationHelper.cancelNavigateCertificates();
+    };
+    CertificateRevokeComponent.prototype.generateLabelValues = function () {
+        this.labelValues = [];
+        this.labelValues.push({ label: 'Name', valueHtml: this.entityTitle });
+        this.labelValues.push({ label: 'MRN', valueHtml: this.entityMrn });
+    };
+    CertificateRevokeComponent.prototype.generateForm = function () {
+        this.revokeForm = this.formBuilder.group({});
+        this.formControlModels = [];
+        var selectValues = this.selectValues();
+        var formControlModelSelect = { selectValues: selectValues, formGroup: this.revokeForm, elementId: 'revocationReason', controlType: mcFormControlModel_1.McFormControlType.Select, labelName: '', placeholder: '', validator: select_validator_1.SelectValidator.validate, showCheckmark: false };
+        var formControl = new forms_1.FormControl('', formControlModelSelect.validator);
+        this.revokeForm.addControl(formControlModelSelect.elementId, formControl);
+        this.formControlModels.push(formControlModelSelect);
+        var formControlModel = { minDate: new Date(), formGroup: this.revokeForm, elementId: 'revokedAt', controlType: mcFormControlModel_1.McFormControlType.Datepicker, labelName: '', validator: forms_1.Validators.required };
+        formControl = new forms_1.FormControl('', formControlModel.validator);
+        this.revokeForm.addControl(formControlModel.elementId, formControl);
+        this.formControlModels.push(formControlModel);
+    };
+    CertificateRevokeComponent.prototype.selectValues = function () {
+        var selectValues = [];
+        selectValues.push({ value: undefined, label: 'Choose reason...', isSelected: true });
+        var allrevokeTypes = this.certificateHelper.getAllRevocationTypes();
+        allrevokeTypes.forEach(function (revokeType) {
+            selectValues.push({ value: revokeType.value, label: revokeType.label, isSelected: false });
+        });
+        return selectValues;
+    };
+    CertificateRevokeComponent = __decorate([
+        core_1.Component({
+            selector: 'certificate-revoke',
+            encapsulation: core_1.ViewEncapsulation.None,
+            template: __webpack_require__("./src/app/pages/shared/components/certificate-revoke/certificate-revoke.html"),
+            styles: []
+        }), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof certificate_helper_service_1.CertificateHelperService !== 'undefined' && certificate_helper_service_1.CertificateHelperService) === 'function' && _a) || Object, (typeof (_b = typeof forms_1.FormBuilder !== 'undefined' && forms_1.FormBuilder) === 'function' && _b) || Object, (typeof (_c = typeof certificates_service_1.CertificatesService !== 'undefined' && certificates_service_1.CertificatesService) === 'function' && _c) || Object, (typeof (_d = typeof router_1.ActivatedRoute !== 'undefined' && router_1.ActivatedRoute) === 'function' && _d) || Object, (typeof (_e = typeof navigation_helper_service_1.NavigationHelperService !== 'undefined' && navigation_helper_service_1.NavigationHelperService) === 'function' && _e) || Object, (typeof (_f = typeof mc_notifications_service_1.MCNotificationsService !== 'undefined' && mc_notifications_service_1.MCNotificationsService) === 'function' && _f) || Object])
+    ], CertificateRevokeComponent);
+    return CertificateRevokeComponent;
+    var _a, _b, _c, _d, _e, _f;
+}());
+exports.CertificateRevokeComponent = CertificateRevokeComponent;
+
+
+/***/ },
+
+/***/ "./src/app/pages/shared/components/certificate-revoke/certificate-revoke.html":
+/***/ function(module, exports) {
+
+module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"Revoke certificate\" baCardClass=\"with-scroll table-panel\">\r\n      <!-- Before issue -->\r\n      <div *ngIf=\"entityType != null && !isLoading\">\r\n        <h5>Revoking certificate for:</h5>\r\n        <mc-label-value-table [isLoading]=\"isLoading\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n        <br>\r\n        <h5>\r\n          Please choose a reason and date for revocation.\r\n        </h5>\r\n        <mc-form [formGroup]=\"revokeForm\" [formControlModels]=\"formControlModels\" [isLoading]=\"isLoading\" [isRegistering]=\"isRevoking\" [registerTitle]=\"revokeTitle\" (onCancel)=\"cancel()\" (onRegister)=\"revoke()\"></mc-form>\r\n      </div>\r\n      <sk-fading-circle [isRunning]=\"isLoading\" ></sk-fading-circle>\r\n    </ba-card>\r\n  </div>\r\n</div>\r\n"
 
 /***/ },
 
@@ -846,6 +965,8 @@ var CertificatesTableComponent = (function () {
     };
     CertificatesTableComponent.prototype.revoke = function (certificate) {
         this.notificationService.generateNotification('Not Implemented', 'Revoke coming soon', mc_notifications_service_1.MCNotificationType.Info);
+        // TODO: Waiting for the new IR deploy coming ultimo february
+        //this.navigationHelper.navigateToRevokeCertificate(this.certificateEntityType, this.entityMrn, this.certificateTitle, certificate.id);
     };
     CertificatesTableComponent.prototype.download = function (certificate) {
         var pemCertificate = { certificate: certificate.certificate };
@@ -908,8 +1029,12 @@ module.exports = ".table-buttons {\n  width: 100%; }\n  .table-buttons button {\
 "use strict";
 "use strict";
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var mc_notifications_service_1 = __webpack_require__("./src/app/shared/mc-notifications.service.ts");
+var organizations_service_1 = __webpack_require__("./src/app/backend-api/identity-registry/services/organizations.service.ts");
 var DesignsTableComponent = (function () {
-    function DesignsTableComponent() {
+    function DesignsTableComponent(orgsService, notifications) {
+        this.orgsService = orgsService;
+        this.notifications = notifications;
     }
     DesignsTableComponent.prototype.ngOnInit = function () {
     };
@@ -927,6 +1052,8 @@ var DesignsTableComponent = (function () {
         tableHeaders.push(tableHeader);
         tableHeader = { title: 'Status', class: 'nowrap' };
         tableHeaders.push(tableHeader);
+        tableHeader = { title: 'Organization', class: 'nowrap' };
+        tableHeaders.push(tableHeader);
         tableHeader = { title: 'Description', class: '' };
         tableHeaders.push(tableHeader);
         for (var _i = 0, _a = this.designs; _i < _a.length; _i++) {
@@ -938,6 +1065,9 @@ var DesignsTableComponent = (function () {
             cells.push(tableCell);
             tableCell = { valueHtml: design.status, class: 'nowrap', truncateNumber: 0 };
             cells.push(tableCell);
+            tableCell = { valueHtml: '', class: 'nowrap', truncateNumber: 30 };
+            this.setOrganizationCell(tableCell, design.organizationId);
+            cells.push(tableCell);
             tableCell = { valueHtml: design.description, class: 'table-description', truncateNumber: 250 };
             cells.push(tableCell);
             var tableRow = { cells: cells };
@@ -945,6 +1075,14 @@ var DesignsTableComponent = (function () {
         }
         this.tableHeaders = tableHeaders;
         this.tableRows = tableRows;
+    };
+    DesignsTableComponent.prototype.setOrganizationCell = function (tableCell, organizationId) {
+        var _this = this;
+        this.orgsService.getOrganizationName(organizationId).subscribe(function (organizationName) {
+            tableCell.valueHtml = organizationName;
+        }, function (err) {
+            _this.notifications.generateNotification('Error', 'Error when trying to get organization', mc_notifications_service_1.MCNotificationType.Error, err);
+        });
     };
     __decorate([
         core_1.Input(), 
@@ -965,9 +1103,10 @@ var DesignsTableComponent = (function () {
             template: __webpack_require__("./src/app/pages/shared/components/designs-table/designs-table.html"),
             styles: []
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [(typeof (_a = typeof organizations_service_1.OrganizationsService !== 'undefined' && organizations_service_1.OrganizationsService) === 'function' && _a) || Object, (typeof (_b = typeof mc_notifications_service_1.MCNotificationsService !== 'undefined' && mc_notifications_service_1.MCNotificationsService) === 'function' && _b) || Object])
     ], DesignsTableComponent);
     return DesignsTableComponent;
+    var _a, _b;
 }());
 exports.DesignsTableComponent = DesignsTableComponent;
 
@@ -987,8 +1126,12 @@ module.exports = "<mc-table [tableHeaders]=\"tableHeaders\" [tableRows]=\"tableR
 "use strict";
 "use strict";
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var mc_notifications_service_1 = __webpack_require__("./src/app/shared/mc-notifications.service.ts");
+var organizations_service_1 = __webpack_require__("./src/app/backend-api/identity-registry/services/organizations.service.ts");
 var InstancesTableComponent = (function () {
-    function InstancesTableComponent() {
+    function InstancesTableComponent(orgsService, notifications) {
+        this.orgsService = orgsService;
+        this.notifications = notifications;
     }
     InstancesTableComponent.prototype.ngOnInit = function () {
     };
@@ -1006,6 +1149,8 @@ var InstancesTableComponent = (function () {
         tableHeaders.push(tableHeader);
         tableHeader = { title: 'Status', class: 'nowrap' };
         tableHeaders.push(tableHeader);
+        tableHeader = { title: 'Organization', class: 'nowrap' };
+        tableHeaders.push(tableHeader);
         tableHeader = { title: 'Description', class: '' };
         tableHeaders.push(tableHeader);
         for (var _i = 0, _a = this.instances; _i < _a.length; _i++) {
@@ -1017,6 +1162,9 @@ var InstancesTableComponent = (function () {
             cells.push(tableCell);
             tableCell = { valueHtml: instance.status, class: 'nowrap', truncateNumber: 0 };
             cells.push(tableCell);
+            tableCell = { valueHtml: '', class: 'nowrap', truncateNumber: 30 };
+            this.setOrganizationCell(tableCell, instance.organizationId);
+            cells.push(tableCell);
             tableCell = { valueHtml: instance.description, class: 'table-description', truncateNumber: 250 };
             cells.push(tableCell);
             var tableRow = { cells: cells };
@@ -1024,6 +1172,14 @@ var InstancesTableComponent = (function () {
         }
         this.tableHeaders = tableHeaders;
         this.tableRows = tableRows;
+    };
+    InstancesTableComponent.prototype.setOrganizationCell = function (tableCell, organizationId) {
+        var _this = this;
+        this.orgsService.getOrganizationName(organizationId).subscribe(function (organizationName) {
+            tableCell.valueHtml = organizationName;
+        }, function (err) {
+            _this.notifications.generateNotification('Error', 'Error when trying to get organization', mc_notifications_service_1.MCNotificationType.Error, err);
+        });
     };
     __decorate([
         core_1.Input(), 
@@ -1044,9 +1200,10 @@ var InstancesTableComponent = (function () {
             template: __webpack_require__("./src/app/pages/shared/components/instances-table/instances-table.html"),
             styles: []
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [(typeof (_a = typeof organizations_service_1.OrganizationsService !== 'undefined' && organizations_service_1.OrganizationsService) === 'function' && _a) || Object, (typeof (_b = typeof mc_notifications_service_1.MCNotificationsService !== 'undefined' && mc_notifications_service_1.MCNotificationsService) === 'function' && _b) || Object])
     ], InstancesTableComponent);
     return InstancesTableComponent;
+    var _a, _b;
 }());
 exports.InstancesTableComponent = InstancesTableComponent;
 
@@ -1222,8 +1379,14 @@ var ServiceDetailsViewComponent = (function () {
             this.labelValues.push({ label: 'Certificate domain name', valueHtml: this.service.certDomainName });
             if (this.service.oidcRedirectUri) {
                 this.labelValues.push({ label: 'OIDC Redirect URI', valueHtml: this.service.oidcRedirectUri });
+            }
+            if (this.service.oidcClientId) {
                 this.labelValues.push({ label: 'OIDC Client ID', valueHtml: this.service.oidcClientId });
+            }
+            if (this.service.oidcClientSecret) {
                 this.labelValues.push({ label: 'OIDC Client Secret', valueHtml: this.service.oidcClientSecret });
+            }
+            if (this.service.oidcAccessType) {
                 this.labelValues.push({ label: 'Access type', valueHtml: ServiceViewModel_1.ServiceViewModel.getLabelForEnum(this.service.oidcAccessType) });
             }
         }
@@ -1301,8 +1464,12 @@ module.exports = "<ba-card title=\"{{title}}\" baCardClass=\"with-scroll table-p
 "use strict";
 "use strict";
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var organizations_service_1 = __webpack_require__("./src/app/backend-api/identity-registry/services/organizations.service.ts");
+var mc_notifications_service_1 = __webpack_require__("./src/app/shared/mc-notifications.service.ts");
 var SpecificationsTableComponent = (function () {
-    function SpecificationsTableComponent() {
+    function SpecificationsTableComponent(orgsService, notifications) {
+        this.orgsService = orgsService;
+        this.notifications = notifications;
     }
     SpecificationsTableComponent.prototype.ngOnInit = function () {
     };
@@ -1320,6 +1487,8 @@ var SpecificationsTableComponent = (function () {
         tableHeaders.push(tableHeader);
         tableHeader = { title: 'Status', class: 'nowrap' };
         tableHeaders.push(tableHeader);
+        tableHeader = { title: 'Organization', class: 'nowrap' };
+        tableHeaders.push(tableHeader);
         tableHeader = { title: 'Description', class: '' };
         tableHeaders.push(tableHeader);
         for (var _i = 0, _a = this.specifications; _i < _a.length; _i++) {
@@ -1331,6 +1500,9 @@ var SpecificationsTableComponent = (function () {
             cells.push(tableCell);
             tableCell = { valueHtml: specification.status, class: 'nowrap', truncateNumber: 0 };
             cells.push(tableCell);
+            tableCell = { valueHtml: '', class: 'nowrap', truncateNumber: 30 };
+            this.setOrganizationCell(tableCell, specification.organizationId);
+            cells.push(tableCell);
             tableCell = { valueHtml: specification.description, class: 'table-description', truncateNumber: 250 };
             cells.push(tableCell);
             var tableRow = { cells: cells };
@@ -1338,6 +1510,14 @@ var SpecificationsTableComponent = (function () {
         }
         this.tableHeaders = tableHeaders;
         this.tableRows = tableRows;
+    };
+    SpecificationsTableComponent.prototype.setOrganizationCell = function (tableCell, organizationId) {
+        var _this = this;
+        this.orgsService.getOrganizationName(organizationId).subscribe(function (organizationName) {
+            tableCell.valueHtml = organizationName;
+        }, function (err) {
+            _this.notifications.generateNotification('Error', 'Error when trying to get organization', mc_notifications_service_1.MCNotificationType.Error, err);
+        });
     };
     __decorate([
         core_1.Input(), 
@@ -1358,9 +1538,10 @@ var SpecificationsTableComponent = (function () {
             template: __webpack_require__("./src/app/pages/shared/components/specifications-table/specifications-table.html"),
             styles: []
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [(typeof (_a = typeof organizations_service_1.OrganizationsService !== 'undefined' && organizations_service_1.OrganizationsService) === 'function' && _a) || Object, (typeof (_b = typeof mc_notifications_service_1.MCNotificationsService !== 'undefined' && mc_notifications_service_1.MCNotificationsService) === 'function' && _b) || Object])
     ], SpecificationsTableComponent);
     return SpecificationsTableComponent;
+    var _a, _b;
 }());
 exports.SpecificationsTableComponent = SpecificationsTableComponent;
 
@@ -1431,6 +1612,7 @@ var organization_details_table_component_1 = __webpack_require__("./src/app/page
 var organization_view_model_service_1 = __webpack_require__("./src/app/pages/shared/services/organization-view-model.service.ts");
 var certificate_issue_new_component_1 = __webpack_require__("./src/app/pages/shared/components/certificate-issue-new/certificate-issue-new.component.ts");
 var service_details_view_component_1 = __webpack_require__("./src/app/pages/shared/components/service-details-view/service-details-view.component.ts");
+var certificate_revoke_component_1 = __webpack_require__("./src/app/pages/shared/components/certificate-revoke/certificate-revoke.component.ts");
 var SharedModule = (function () {
     function SharedModule() {
     }
@@ -1447,6 +1629,7 @@ var SharedModule = (function () {
                 certificates_table_component_1.CertificatesTableComponent,
                 organization_details_table_component_1.OrganizationDetailsTableComponent,
                 certificate_issue_new_component_1.CertificateIssueNewComponent,
+                certificate_revoke_component_1.CertificateRevokeComponent,
                 service_details_view_component_1.ServiceDetailsViewComponent
             ],
             exports: [
@@ -1456,6 +1639,7 @@ var SharedModule = (function () {
                 specifications_table_component_1.SpecificationsTableComponent,
                 certificates_table_component_1.CertificatesTableComponent,
                 certificate_issue_new_component_1.CertificateIssueNewComponent,
+                certificate_revoke_component_1.CertificateRevokeComponent,
                 service_details_view_component_1.ServiceDetailsViewComponent
             ],
             providers: [
@@ -1469,39 +1653,6 @@ var SharedModule = (function () {
     return SharedModule;
 }());
 exports.SharedModule = SharedModule;
-
-
-/***/ },
-
-/***/ "./src/app/shared/enums-helper.ts":
-/***/ function(module, exports) {
-
-"use strict";
-"use strict";
-var EnumsHelper = (function () {
-    function EnumsHelper() {
-    }
-    EnumsHelper.getKeysAndValuesFromEnum = function (myEnum) {
-        var enumKeysAndValues = [];
-        var keysAndValues = [];
-        for (var enumValue in myEnum) {
-            var enumsKeysAndValuesLength = keysAndValues.length;
-            if (enumsKeysAndValuesLength === 0) {
-                keysAndValues.push([enumValue, myEnum[enumValue]]);
-                enumKeysAndValues.push({ key: enumValue, value: myEnum[enumValue] });
-            }
-            else {
-                if (keysAndValues[enumsKeysAndValuesLength - 1][1] !== enumValue) {
-                    keysAndValues.push([enumValue, myEnum[enumValue]]);
-                    enumKeysAndValues.push({ key: enumValue, value: myEnum[enumValue] });
-                }
-            }
-        }
-        return enumKeysAndValues;
-    };
-    return EnumsHelper;
-}());
-exports.EnumsHelper = EnumsHelper;
 
 
 /***/ }
