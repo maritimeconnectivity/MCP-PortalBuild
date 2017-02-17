@@ -566,8 +566,7 @@ var CertificateRevokeComponent = (function () {
         if (tempRevocationReason && tempRevocationReason.toLowerCase().indexOf('undefined') < 0) {
             revocationReason = tempRevocationReason;
         }
-        console.log("SSS: ", revokeDate.valueOf());
-        var certificateRevocation = { revokationReason: revocationReason, revokedAt: '1499925534000' }; //revokeDate.valueOf()}
+        var certificateRevocation = { revokationReason: revocationReason, revokedAt: revokeDate.getTime() + '' };
         this.certificateService.revokeCertificate(this.entityType, this.entityMrn, this.certificateId, certificateRevocation).subscribe(function (_) {
             _this.isRevoking = false;
             _this.navigationHelper.cancelNavigateCertificates();
