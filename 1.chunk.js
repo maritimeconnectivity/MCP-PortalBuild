@@ -3567,6 +3567,9 @@ var ServiceDetailsViewComponent = (function () {
             this.generateLabelValues();
         }
     };
+    ServiceDetailsViewComponent.prototype.showDownload = function () {
+        return this.service.oidcClientId && this.isAdmin();
+    };
     ServiceDetailsViewComponent.prototype.downloadXML = function () {
         var _this = this;
         this.servicesService.getIdServiceJbossXml(this.service.mrn).subscribe(function (xmlString) {
@@ -3669,7 +3672,7 @@ exports.ServiceDetailsViewComponent = ServiceDetailsViewComponent;
 /***/ "./src/app/pages/shared/components/service-details-view/service-details-view.html":
 /***/ function(module, exports) {
 
-module.exports = "<ba-card title=\"{{title}}\" baCardClass=\"with-scroll table-panel\">\r\n  <mc-label-value-table [isLoading]=\"isLoading\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n  <ul *ngIf=\"!isLoading && service && (this.service.oidcClientId || showDelete() || showUpdate())\" class=\"btn-list clearfix\">\r\n    <li *ngIf=\"this.service.oidcClientId\">\r\n      <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadXML()\">Download JBOSS XML</button>\r\n    </li>\r\n    <li *ngIf=\"this.service.oidcClientId\">\r\n      <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadJSON()\">Download Keycloak JSON</button>\r\n    </li>\r\n    <li *ngIf=\"showUpdate()\">\r\n      <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"update()\">Update</button>\r\n    </li>\r\n    <li *ngIf=\"showDelete()\">\r\n      <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"delete()\">Delete Service</button>\r\n    </li>\r\n  </ul>\r\n</ba-card>\r\n\r\n<div *ngIf=\"service\">\r\n  <ba-card title=\"Certificates for {{service.name}}\" baCardClass=\"with-scroll table-panel\">\r\n    <certificates-table [entityMrn]=\"service.mrn\" [isLoading]=\"isLoading\" [certificateTitle]=\"service.name\" [certificateEntityType]=\"entityType\" [certificates]=\"service.certificates\"></certificates-table>\r\n  </ba-card>\r\n</div>"
+module.exports = "<ba-card title=\"{{title}}\" baCardClass=\"with-scroll table-panel\">\r\n  <mc-label-value-table [isLoading]=\"isLoading\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n  <ul *ngIf=\"!isLoading && service && (showDownload() || showDelete() || showUpdate())\" class=\"btn-list clearfix\">\r\n    <li *ngIf=\"showDownload()\">\r\n      <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadXML()\">Download JBOSS XML</button>\r\n    </li>\r\n    <li *ngIf=\"showDownload()\">\r\n      <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadJSON()\">Download Keycloak JSON</button>\r\n    </li>\r\n    <li *ngIf=\"showUpdate()\">\r\n      <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"update()\">Update</button>\r\n    </li>\r\n    <li *ngIf=\"showDelete()\">\r\n      <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"delete()\">Delete Service</button>\r\n    </li>\r\n  </ul>\r\n</ba-card>\r\n\r\n<div *ngIf=\"service\">\r\n  <ba-card title=\"Certificates for {{service.name}}\" baCardClass=\"with-scroll table-panel\">\r\n    <certificates-table [entityMrn]=\"service.mrn\" [isLoading]=\"isLoading\" [certificateTitle]=\"service.name\" [certificateEntityType]=\"entityType\" [certificates]=\"service.certificates\"></certificates-table>\r\n  </ba-card>\r\n</div>"
 
 /***/ },
 
