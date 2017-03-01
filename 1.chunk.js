@@ -1107,11 +1107,11 @@ var DesignNewComponent = (function () {
         this.orgService = orgService;
         this.specificationsService = specificationsService;
         this.hasError = false;
-        this.captionXml = 'Upload Design Xml file';
+        this.captionXml = 'Upload Design XML file';
         this.captionDoc = 'Upload Design Document file';
         this.fileTypeXml = mcFileUploader_component_1.FileUploadType.Xml;
         this.fileTypeDoc = mcFileUploader_component_1.FileUploadType.Doc;
-        this.requiredTextXml = 'You need to upload Xml file';
+        this.requiredTextXml = 'You need to upload XML file';
         this.isFormValid = false;
         this.isLoading = true;
         this.isRegistering = false;
@@ -1147,7 +1147,7 @@ var DesignNewComponent = (function () {
             var mrn = this.xmlParser.getMrn(file);
             var isValid = this.mrnHelper.checkMrnForDesign(mrn);
             if (!isValid) {
-                this.errorText = "The ID in the Xml-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
+                this.errorText = "The ID in the XML-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
                     + this.mrnHelper.mrnMaskForDesign() + "'ID'<BR>"
                     + "'ID'=" + this.mrnHelper.mrnPatternError();
             }
@@ -1511,8 +1511,14 @@ var InstanceDetailsComponent = (function () {
     InstanceDetailsComponent.prototype.isAdmin = function () {
         return (this.authService.authState.isAdmin() && this.isMyOrg()) || this.authService.authState.isSiteAdmin();
     };
+    InstanceDetailsComponent.prototype.showUpdate = function () {
+        return this.isAdmin();
+    };
     InstanceDetailsComponent.prototype.showDelete = function () {
         return this.isAdmin();
+    };
+    InstanceDetailsComponent.prototype.update = function () {
+        this.navigationHelperService.navigateToUpdateInstance(this.instance.instanceId, this.instance.version);
     };
     InstanceDetailsComponent.prototype.delete = function () {
         this.modalDescription = 'Do you want to delete the instance?';
@@ -1565,7 +1571,7 @@ exports.InstanceDetailsComponent = InstanceDetailsComponent;
 /***/ "./src/app/pages/org-service-registry/instances/components/instance-details/instance-details.html":
 /***/ function(module, exports) {
 
-module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"{{title}}\" baCardClass=\"with-scroll table-panel\">\r\n      <mc-label-value-table [isLoading]=\"isLoadingInstance\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n      <ul *ngIf=\"instance && !isLoadingInstance\" class=\"btn-list clearfix\">\r\n        <li *ngIf=\"instance.instanceAsDoc\">\r\n          <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadDoc()\">Download document</button>\r\n        </li>\r\n        <li *ngIf=\"instance.instanceAsXml\">\r\n          <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadXml()\">Download XML</button>\r\n        </li>\r\n        <li *ngIf=\"showDelete()\">\r\n          <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"delete()\">Delete Instance</button>\r\n        </li>\r\n      </ul>\r\n    </ba-card>\r\n\r\n    <div *ngIf=\"shouldDisplayIdService\">\r\n      <service-details-view [shouldShowUpdate]=\"showUpdateIdService\" (updateAction)=\"updateIdService()\" [shouldShowDelete]=\"false\" [isLoading]=\"isLoadingIdService\" [title]=\"titleIdService\" [service]=\"idService\"></service-details-view>\r\n    </div>\r\n\r\n    <div *ngIf=\"shouldDisplayCreateButton\">\r\n      <ba-card title=\"{{titleIdService}}\" baCardClass=\"with-scroll table-panel\">\r\n        <ul class=\"btn-list clearfix\">\r\n          <li>\r\n            <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"createIdService()\">Create ID Service</button>\r\n          </li>\r\n        </ul>\r\n      </ba-card>\r\n    </div>\r\n  </div>\r\n</div>\r\n<mc-modal (onCancel)=\"cancelModal()\" (onOk)=\"deleteForSure()\" [show]=\"showModal\" [title]=\"'Delete instance'\" [description]=\"modalDescription\" [cancelClass]=\"'btn btn-default btn-raised'\" [cancelTitle]=\"'Cancel'\" [okClass]=\"'btn btn-danger btn-raised'\" [okTitle]=\"'Delete'\"></mc-modal>\r\n"
+module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"{{title}}\" baCardClass=\"with-scroll table-panel\">\r\n      <mc-label-value-table [isLoading]=\"isLoadingInstance\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n      <ul *ngIf=\"instance && !isLoadingInstance\" class=\"btn-list clearfix\">\r\n        <li *ngIf=\"instance.instanceAsDoc\">\r\n          <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadDoc()\">Download document</button>\r\n        </li>\r\n        <li *ngIf=\"instance.instanceAsXml\">\r\n          <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"downloadXml()\">Download XML</button>\r\n        </li>\r\n        <li *ngIf=\"showUpdate()\">\r\n          <button type=\"button\" class=\"btn btn-primary btn-raised\" (click)=\"update()\">Update Instance</button>\r\n        </li>\r\n        <li *ngIf=\"showDelete()\">\r\n          <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"delete()\">Delete Instance</button>\r\n        </li>\r\n      </ul>\r\n    </ba-card>\r\n\r\n    <div *ngIf=\"shouldDisplayIdService\">\r\n      <service-details-view [shouldShowUpdate]=\"showUpdateIdService\" (updateAction)=\"updateIdService()\" [shouldShowDelete]=\"false\" [isLoading]=\"isLoadingIdService\" [title]=\"titleIdService\" [service]=\"idService\"></service-details-view>\r\n    </div>\r\n\r\n    <div *ngIf=\"shouldDisplayCreateButton\">\r\n      <ba-card title=\"{{titleIdService}}\" baCardClass=\"with-scroll table-panel\">\r\n        <ul class=\"btn-list clearfix\">\r\n          <li>\r\n            <button type=\"button\" class=\"btn btn-danger btn-raised\" (click)=\"createIdService()\">Create ID Service</button>\r\n          </li>\r\n        </ul>\r\n      </ba-card>\r\n    </div>\r\n  </div>\r\n</div>\r\n<mc-modal (onCancel)=\"cancelModal()\" (onOk)=\"deleteForSure()\" [show]=\"showModal\" [title]=\"'Delete instance'\" [description]=\"modalDescription\" [cancelClass]=\"'btn btn-default btn-raised'\" [cancelTitle]=\"'Cancel'\" [okClass]=\"'btn btn-danger btn-raised'\" [okTitle]=\"'Delete'\"></mc-modal>\r\n"
 
 /***/ },
 
@@ -1681,11 +1687,11 @@ var InstanceNewComponent = (function () {
         this.instancesService = instancesService;
         this.idServicesService = idServicesService;
         this.hasError = false;
-        this.captionXml = 'Upload Instance Xml file';
+        this.captionXml = 'Upload Instance XML file';
         this.captionDoc = 'Upload Instance Document file';
         this.fileTypeXml = mcFileUploader_component_1.FileUploadType.Xml;
         this.fileTypeDoc = mcFileUploader_component_1.FileUploadType.Doc;
-        this.requiredTextXml = 'You need to upload Xml file';
+        this.requiredTextXml = 'You need to upload XML file';
         this.isLoading = true;
         this.isRegistering = false;
         this.registerTitle = "Register Instance";
@@ -1749,7 +1755,7 @@ var InstanceNewComponent = (function () {
             else {
                 this.mrn = '';
                 this.name = '';
-                this.errorText = "The ID in the Xml-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
+                this.errorText = "The ID in the XML-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
                     + this.mrnHelper.mrnMaskForInstance() + "'ID'<BR>"
                     + "'ID'=" + this.mrnHelper.mrnPatternError();
             }
@@ -1881,7 +1887,7 @@ var InstanceNewComponent = (function () {
         var formControl = new forms_1.FormControl(this.mrn, formControlModel.validator);
         this.registerForm.addControl(formControlModel.elementId, formControl);
         this.formControlModels.push(formControlModel);
-        formControlModel = { formGroup: this.registerForm, elementId: 'name', controlType: mcFormControlModel_1.McFormControlType.Text, labelName: 'Name', placeholder: 'Upload Instance Xml', isDisabled: true };
+        formControlModel = { formGroup: this.registerForm, elementId: 'name', controlType: mcFormControlModel_1.McFormControlType.Text, labelName: 'Name', placeholder: 'Upload Instance XML', isDisabled: true };
         formControl = new forms_1.FormControl(this.name, formControlModel.validator);
         this.registerForm.addControl(formControlModel.elementId, formControl);
         this.formControlModels.push(formControlModel);
@@ -1961,6 +1967,305 @@ module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-
 
 /***/ },
 
+/***/ "./src/app/pages/org-service-registry/instances/components/instance-update/instance-update.component.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var mc_notifications_service_1 = __webpack_require__("./src/app/shared/mc-notifications.service.ts");
+var mcFileUploader_component_1 = __webpack_require__("./src/app/theme/components/mcFileUploader/mcFileUploader.component.ts");
+var navigation_helper_service_1 = __webpack_require__("./src/app/shared/navigation-helper.service.ts");
+var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
+var instances_service_1 = __webpack_require__("./src/app/backend-api/service-registry/services/instances.service.ts");
+var instance_xml_parser_service_1 = __webpack_require__("./src/app/pages/org-service-registry/shared/services/instance-xml-parser.service.ts");
+var mrn_helper_service_1 = __webpack_require__("./src/app/shared/mrn-helper.service.ts");
+var mcFormControlModel_1 = __webpack_require__("./src/app/theme/components/mcForm/mcFormControlModel.ts");
+var forms_1 = __webpack_require__("./node_modules/@angular/forms/index.js");
+var rxjs_1 = __webpack_require__("./node_modules/rxjs/Rx.js");
+var designs_service_1 = __webpack_require__("./src/app/backend-api/service-registry/services/designs.service.ts");
+var InstanceUpdateComponent = (function () {
+    function InstanceUpdateComponent(formBuilder, xmlParser, mrnHelper, router, activatedRoute, navigationService, notifications, instancesService, designService) {
+        this.formBuilder = formBuilder;
+        this.xmlParser = xmlParser;
+        this.mrnHelper = mrnHelper;
+        this.router = router;
+        this.activatedRoute = activatedRoute;
+        this.navigationService = navigationService;
+        this.notifications = notifications;
+        this.instancesService = instancesService;
+        this.designService = designService;
+        this.hasError = false;
+        this.captionXml = 'Upload Instance XML file';
+        this.captionDoc = 'Upload Instance Document file';
+        this.fileTypeXml = mcFileUploader_component_1.FileUploadType.Xml;
+        this.fileTypeDoc = mcFileUploader_component_1.FileUploadType.Doc;
+        this.isLoading = true;
+        this.isUpdating = false;
+        this.updateTitle = "Update Instance";
+        this.isFormChanged = false;
+        this.mrn = '';
+        this.name = '';
+        this.status = '';
+    }
+    InstanceUpdateComponent.prototype.ngOnInit = function () {
+        this.isUpdating = false;
+        this.isLoading = true;
+        this.loadInstance();
+    };
+    InstanceUpdateComponent.prototype.setFormChanged = function () {
+        var changed = false;
+        if (this.xml || this.doc) {
+            changed = true;
+        }
+        else if (this.status != this.instance.status) {
+            changed = true;
+        }
+        this.isFormChanged = changed;
+    };
+    InstanceUpdateComponent.prototype.onUploadDoc = function (file) {
+        this.doc = file;
+        this.hasError = false;
+        this.setFormChanged();
+        this.generateForm();
+    };
+    InstanceUpdateComponent.prototype.onUploadXml = function (file) {
+        var _this = this;
+        this.hasError = false;
+        if (file) {
+            this.isXmlValid(file).subscribe(function (isValid) {
+                _this.hasError = !isValid;
+                if (isValid) {
+                    _this.xml = file;
+                }
+                else {
+                    _this.resetXmlFile();
+                }
+                _this.setFormChanged();
+                _this.generateForm();
+            });
+        }
+        else {
+            this.hasError = false;
+            this.resetXmlFile();
+            this.setFormChanged();
+            this.generateForm();
+        }
+    };
+    InstanceUpdateComponent.prototype.resetXmlFile = function () {
+        this.name = this.instance.name;
+        this.status = this.instance.status;
+        this.xml = null;
+        this.fileUploadXml.resetFileSelection();
+    };
+    InstanceUpdateComponent.prototype.isXmlValid = function (file) {
+        var _this = this;
+        try {
+            var mrn = this.xmlParser.getMrn(file);
+            var isValid = this.mrnHelper.checkMrnForInstance(mrn);
+            if (isValid) {
+                var designMrn_1 = this.xmlParser.getMrnForDesignInInstance(file);
+                var designVersion_1 = this.xmlParser.getVersionForDesignInInstance(file);
+                var isDesignTheSame = this.isDesignSameAsBefore(designMrn_1, designVersion_1);
+                if (isDesignTheSame) {
+                    var parseValid = this.parseDisplayValues(file);
+                    return rxjs_1.Observable.of(parseValid);
+                }
+                else {
+                    return rxjs_1.Observable.create(function (observer) {
+                        _this.designService.getDesign(designMrn_1, designVersion_1).subscribe(function (design) {
+                            var parseValid = _this.parseDisplayValues(file);
+                            observer.next(parseValid);
+                        }, function (err) {
+                            if (err.status == 404) {
+                                _this.errorText = "The MRN and version referencing the Design in the XML, doesn't match any designs in Service Registry<BR><BR>"
+                                    + "Xml-parsed Design: " + designMrn_1 + ", version: " + designVersion_1 + "<BR>";
+                            }
+                            else {
+                                _this.errorText = "Error when trying to validate implemented design.<BR>";
+                                // If error isn't "Not found" then another error occured and we can't proceed
+                                _this.notifications.generateNotification('Error when trying to validate implemented design: ', err.message, mc_notifications_service_1.MCNotificationType.Error, err);
+                            }
+                            observer.next(false);
+                        });
+                    });
+                }
+            }
+            else {
+                this.errorText = "The ID in the XML-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
+                    + this.mrnHelper.mrnMaskForInstance() + "'ID'<BR>"
+                    + "'ID'=" + this.mrnHelper.mrnPatternError();
+                return rxjs_1.Observable.of(false);
+            }
+        }
+        catch (error) {
+            this.errorText = "Error in XML.<BR>";
+            this.notifications.generateNotification('Error in XML', error.message, mc_notifications_service_1.MCNotificationType.Error, error);
+            return rxjs_1.Observable.of(false);
+        }
+    };
+    InstanceUpdateComponent.prototype.parseDisplayValues = function (file) {
+        this.name = this.xmlParser.getName(file);
+        this.status = this.xmlParser.getStatus(file);
+        var parsedMrn = this.xmlParser.getMrn(file);
+        if (parsedMrn != this.instance.instanceId) {
+            this.errorText = "The MRN in the XML is not the same as the MRN of this Instance. If the MRN needs to be changed, please create a NEW Instance instead of updating an existing.<BR><BR>"
+                + "Xml-parsed MRN: " + parsedMrn + "<BR>";
+            return false;
+        }
+        else {
+            return true;
+        }
+    };
+    InstanceUpdateComponent.prototype.isDesignSameAsBefore = function (designMrn, designVersion) {
+        try {
+            var designMrnFromInstance = this.xmlParser.getMrnForDesignInInstance(this.instance.instanceAsXml);
+            var designVersionFromInstance = this.xmlParser.getVersionForDesignInInstance(this.instance.instanceAsXml);
+            var isSameMrn = designMrnFromInstance === designMrn;
+            var isSameVersion = designVersionFromInstance === designVersion;
+            return isSameMrn && isSameVersion;
+        }
+        catch (error) {
+            return false;
+        }
+    };
+    InstanceUpdateComponent.prototype.cancel = function () {
+        this.navigationService.navigateToOrgInstance(this.instanceIdFromRoute, this.versionFromRoute);
+    };
+    InstanceUpdateComponent.prototype.update = function () {
+        this.isUpdating = true;
+        if (this.xml || this.doc) {
+            try {
+                if (this.xml) {
+                    this.instance.instanceAsXml = this.xml;
+                    this.instance.name = this.xmlParser.getName(this.xml);
+                    this.instance.description = this.xmlParser.getDescription(this.xml);
+                    this.instance.keywords = this.xmlParser.getKeywords(this.xml);
+                    this.instance.status = this.xmlParser.getStatus(this.xml);
+                    this.instance.version = this.xmlParser.getVersion(this.xml);
+                    this.instance.designId = this.xmlParser.getMrnForDesignInInstance(this.xml);
+                }
+                if (this.doc) {
+                    this.instance.instanceAsDoc = this.doc;
+                }
+                this.updateInstance();
+            }
+            catch (error) {
+                this.isUpdating = false;
+                this.notifications.generateNotification('Error in XML', error.message, mc_notifications_service_1.MCNotificationType.Error, error);
+            }
+        }
+        else {
+            this.status = this.updateForm.value.status;
+            this.updateStatus();
+        }
+    };
+    InstanceUpdateComponent.prototype.updateStatus = function () {
+        this.notifications.generateNotification("Not Implemented", "Update status only, is sadly not implemented yet", mc_notifications_service_1.MCNotificationType.Info);
+        this.isUpdating = false;
+        /*
+          this.instancesService.updateStatus(this.instance, this.status).subscribe(_ => {
+                  this.navigationService.navigateToOrgInstance(this.instance.instanceId, this.instance.version);
+              },
+              err => {
+                  this.isUpdating = false;
+                  this.notifications.generateNotification('Error', 'Error when trying to update status', MCNotificationType.Error, err);
+              });
+              */
+    };
+    InstanceUpdateComponent.prototype.updateInstance = function () {
+        var _this = this;
+        var updateDoc = this.doc != null;
+        var updateXml = this.xml != null;
+        this.instancesService.updateInstance(this.instance, updateDoc, updateXml).subscribe(function (_) {
+            _this.navigationService.navigateToOrgInstance(_this.instance.instanceId, _this.instance.version);
+        }, function (err) {
+            _this.isUpdating = false;
+            _this.notifications.generateNotification('Error', 'Error when trying to update instance', mc_notifications_service_1.MCNotificationType.Error, err);
+        });
+    };
+    InstanceUpdateComponent.prototype.loadInstance = function () {
+        var _this = this;
+        this.instanceIdFromRoute = this.activatedRoute.snapshot.params['id'];
+        this.versionFromRoute = this.activatedRoute.snapshot.queryParams['instanceVersion'];
+        this.instancesService.getInstance(this.instanceIdFromRoute, this.versionFromRoute).subscribe(function (instance) {
+            _this.instance = instance;
+            _this.status = _this.instance.status;
+            _this.mrn = _this.instance.instanceId;
+            _this.name = _this.instance.name;
+            _this.generateLabelValues();
+            _this.generateForm();
+            _this.isLoading = false;
+        }, function (err) {
+            // TODO: make this as a general component
+            if (err.status == 404) {
+                _this.router.navigate(['/error404'], { relativeTo: _this.activatedRoute, replaceUrl: true });
+            }
+            _this.isLoading = false;
+            _this.notifications.generateNotification('Error', 'Error when trying to get instance', mc_notifications_service_1.MCNotificationType.Error, err);
+        });
+    };
+    InstanceUpdateComponent.prototype.generateLabelValues = function () {
+        this.labelValues = [];
+        this.labelValues.push({ label: 'MRN', valueHtml: this.instance.instanceId });
+        this.labelValues.push({ label: 'Name', valueHtml: this.instance.name });
+    };
+    InstanceUpdateComponent.prototype.setStatus = function (status) {
+        this.status = status;
+        this.setFormChanged();
+    };
+    InstanceUpdateComponent.prototype.generateForm = function () {
+        var _this = this;
+        this.updateForm = this.formBuilder.group({});
+        this.formControlModels = [];
+        var formControlModel = { formGroup: this.updateForm, elementId: 'mrn', controlType: mcFormControlModel_1.McFormControlType.Text, labelName: 'MRN', placeholder: 'Upload Instance Xml', isDisabled: true };
+        var formControl = new forms_1.FormControl(this.mrn, formControlModel.validator);
+        this.updateForm.addControl(formControlModel.elementId, formControl);
+        this.formControlModels.push(formControlModel);
+        formControlModel = { formGroup: this.updateForm, elementId: 'name', controlType: mcFormControlModel_1.McFormControlType.Text, labelName: 'Name', placeholder: 'Upload Instance XML', isDisabled: true };
+        formControl = new forms_1.FormControl(this.name, formControlModel.validator);
+        this.updateForm.addControl(formControlModel.elementId, formControl);
+        this.formControlModels.push(formControlModel);
+        var disableStatus = this.xml != null || this.doc != null;
+        if (disableStatus) {
+            formControlModel = { formGroup: this.updateForm, elementId: 'status', controlType: mcFormControlModel_1.McFormControlType.Text, labelName: 'Status', placeholder: '', isDisabled: disableStatus };
+        }
+        else {
+            formControlModel = { formGroup: this.updateForm, elementId: 'status', controlType: mcFormControlModel_1.McFormControlType.Text, labelName: 'Status', placeholder: '' };
+        }
+        formControl = new forms_1.FormControl(this.status, formControlModel.validator);
+        formControl.valueChanges.subscribe(function (param) { return _this.setStatus(param); });
+        this.updateForm.addControl(formControlModel.elementId, formControl);
+        this.formControlModels.push(formControlModel);
+    };
+    __decorate([
+        core_1.ViewChild('uploadXml'), 
+        __metadata('design:type', (typeof (_a = typeof mcFileUploader_component_1.McFileUploader !== 'undefined' && mcFileUploader_component_1.McFileUploader) === 'function' && _a) || Object)
+    ], InstanceUpdateComponent.prototype, "fileUploadXml", void 0);
+    InstanceUpdateComponent = __decorate([
+        core_1.Component({
+            selector: 'instance-update',
+            encapsulation: core_1.ViewEncapsulation.None,
+            template: __webpack_require__("./src/app/pages/org-service-registry/instances/components/instance-update/instance-update.html"),
+            styles: []
+        }), 
+        __metadata('design:paramtypes', [(typeof (_b = typeof forms_1.FormBuilder !== 'undefined' && forms_1.FormBuilder) === 'function' && _b) || Object, (typeof (_c = typeof instance_xml_parser_service_1.InstanceXmlParser !== 'undefined' && instance_xml_parser_service_1.InstanceXmlParser) === 'function' && _c) || Object, (typeof (_d = typeof mrn_helper_service_1.MrnHelperService !== 'undefined' && mrn_helper_service_1.MrnHelperService) === 'function' && _d) || Object, (typeof (_e = typeof router_1.Router !== 'undefined' && router_1.Router) === 'function' && _e) || Object, (typeof (_f = typeof router_1.ActivatedRoute !== 'undefined' && router_1.ActivatedRoute) === 'function' && _f) || Object, (typeof (_g = typeof navigation_helper_service_1.NavigationHelperService !== 'undefined' && navigation_helper_service_1.NavigationHelperService) === 'function' && _g) || Object, (typeof (_h = typeof mc_notifications_service_1.MCNotificationsService !== 'undefined' && mc_notifications_service_1.MCNotificationsService) === 'function' && _h) || Object, (typeof (_j = typeof instances_service_1.InstancesService !== 'undefined' && instances_service_1.InstancesService) === 'function' && _j) || Object, (typeof (_k = typeof designs_service_1.DesignsService !== 'undefined' && designs_service_1.DesignsService) === 'function' && _k) || Object])
+    ], InstanceUpdateComponent);
+    return InstanceUpdateComponent;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+}());
+exports.InstanceUpdateComponent = InstanceUpdateComponent;
+
+
+/***/ },
+
+/***/ "./src/app/pages/org-service-registry/instances/components/instance-update/instance-update.html":
+/***/ function(module, exports) {
+
+module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"Update Instance - {{instance?.name}}\" baCardClass=\"with-scroll table-panel\">\r\n      <h5>Updating Instance</h5>\r\n      <mc-label-value-table [isLoading]=\"isLoading\" [labelValues]=\"labelValues\"></mc-label-value-table>\r\n\r\n      <div class=\"separator\"></div>\r\n\r\n      <div *ngIf=\"instance\">\r\n        <div class=\"important-notice-big\">\r\n          If only the <span>status</span> needs to be updated, leave the <span>XML</span> and <span>Document</span> fields empty.<br>\r\n          <br>\r\n          If a new XML-file is uploaded the <span>status</span> will be parsed from the XML.\r\n        </div>\r\n        <div class=\"separator\"></div>\r\n        <form>\r\n          <mc-file-uploader #uploadXml [caption]=\"captionXml\" [fileUploadType]=\"fileTypeXml\" (onUpload)=\"onUploadXml($event)\"></mc-file-uploader>\r\n          <mc-file-uploader [caption]=\"captionDoc\" [fileUploadType]=\"fileTypeDoc\" (onUpload)=\"onUploadDoc($event)\"></mc-file-uploader>\r\n          <div *ngIf=\"hasError\" class=\"error-notice\" [innerHTML]=\"errorText | undefined | sanitizeHtml\"></div>\r\n          <mc-form [isFormValid]=\"isFormChanged\" [formGroup]=\"updateForm\" [formControlModels]=\"formControlModels\" [isLoading]=\"isLoading\" [isRegistering]=\"isUpdating\" [registerTitle]=\"updateTitle\" (onCancel)=\"cancel()\" (onRegister)=\"update()\"></mc-form>\r\n        </form>\r\n      </div>\r\n      <div class=\"no-data\" *ngIf=\"!instance && !isLoading\">No data</div>\r\n    </ba-card>\r\n  </div>\r\n</div>\r\n"
+
+/***/ },
+
 /***/ "./src/app/pages/org-service-registry/instances/instances.component.ts":
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1999,6 +2304,7 @@ var instance_list_component_1 = __webpack_require__("./src/app/pages/org-service
 var instance_details_component_1 = __webpack_require__("./src/app/pages/org-service-registry/instances/components/instance-details/instance-details.component.ts");
 var instance_new_component_1 = __webpack_require__("./src/app/pages/org-service-registry/instances/components/instance-new/instance-new.component.ts");
 var services_module_1 = __webpack_require__("./src/app/pages/org-identity-registry/services/services.module.ts");
+var instance_update_component_1 = __webpack_require__("./src/app/pages/org-service-registry/instances/components/instance-update/instance-update.component.ts");
 var InstancesModule = (function () {
     function InstancesModule() {
     }
@@ -2015,7 +2321,8 @@ var InstancesModule = (function () {
                 instances_component_1.InstancesComponent,
                 instance_list_component_1.InstanceListComponent,
                 instance_details_component_1.InstanceDetailsComponent,
-                instance_new_component_1.InstanceNewComponent
+                instance_new_component_1.InstanceNewComponent,
+                instance_update_component_1.InstanceUpdateComponent
             ]
         }), 
         __metadata('design:paramtypes', [])
@@ -2042,6 +2349,7 @@ var service_new_component_1 = __webpack_require__("./src/app/pages/org-identity-
 var certificate_issue_new_component_1 = __webpack_require__("./src/app/pages/shared/components/certificate-issue-new/certificate-issue-new.component.ts");
 var service_update_component_1 = __webpack_require__("./src/app/pages/org-identity-registry/services/components/service-update/service-update.component.ts");
 var certificate_revoke_component_1 = __webpack_require__("./src/app/pages/shared/components/certificate-revoke/certificate-revoke.component.ts");
+var instance_update_component_1 = __webpack_require__("./src/app/pages/org-service-registry/instances/components/instance-update/instance-update.component.ts");
 // noinspection TypeScriptValidateTypes
 exports.routes = [
     {
@@ -2083,6 +2391,11 @@ exports.routes = [
             {
                 path: 'update-id/:id',
                 component: service_update_component_1.ServiceUpdateComponent,
+                data: { breadcrumb: 'Update ID' }
+            },
+            {
+                path: 'update/:id',
+                component: instance_update_component_1.InstanceUpdateComponent,
                 data: { breadcrumb: 'Update' }
             }
         ]
@@ -2530,11 +2843,11 @@ var SpecificationNewComponent = (function () {
         this.specificationsService = specificationsService;
         this.orgService = orgService;
         this.hasMrnError = false;
-        this.captionXml = 'Upload Specification Xml file';
+        this.captionXml = 'Upload Specification XML file';
         this.captionDoc = 'Upload Specification Document file';
         this.fileTypeXml = mcFileUploader_component_1.FileUploadType.Xml;
         this.fileTypeDoc = mcFileUploader_component_1.FileUploadType.Doc;
-        this.requiredTextXml = 'You need to upload Xml file';
+        this.requiredTextXml = 'You need to upload XML file';
         this.isFormValid = false;
         this.isLoading = true;
         this.isRegistering = false;
@@ -2570,7 +2883,7 @@ var SpecificationNewComponent = (function () {
             var isValid = this.mrnHelper.checkMrnForSpecification(mrn);
             this.hasMrnError = !isValid;
             if (!isValid) {
-                this.mrnErrorText = "The ID in the Xml-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
+                this.mrnErrorText = "The ID in the XML-file is wrong. The ID is supposed to be an MRN in the following format:<BR>"
                     + this.mrnHelper.mrnMaskForSpecification() + "'ID'<BR>"
                     + "'ID'=" + this.mrnHelper.mrnPatternError();
             }
@@ -2803,7 +3116,7 @@ exports.SrHowToComponent = SrHowToComponent;
 /***/ "./src/app/pages/org-service-registry/sr-how-to/sr-how-to.html":
 /***/ function(module, exports) {
 
-module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"Service Registry - How to?\" baCardClass=\"with-scroll table-panel\">\r\n      <h5 style=\"margin-bottom: 2px;\">Guide on how to make services for the Maritime Cloud - Concepts and how to:</h5>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Documentation_Guidelines.pdf\" class=\"learn-more\" target=\"_blank\">Service Specification Guideline</a>\r\n\r\n      <h5 style=\"margin-bottom: 2px; margin-top: 15px\">TEMPLATES:</h5>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Specification_Template.docx\" class=\"learn-more\" target=\"_blank\">Download Specification template</a>\r\n      <BR/>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Design_Description_Template.docx\" class=\"learn-more\" target=\"_blank\">Download Technical Design template</a>\r\n      <BR/>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Implementation_Description_Template.docx\" class=\"learn-more\" target=\"_blank\">Download Instance template</a>\r\n      <div *ngIf=\"xsds && xsds.length>0\">\r\n        <h5 style=\"margin-bottom: 2px; margin-top: 15px\">XSDs:</h5>\r\n        <div *ngFor=\"let xsd of xsds\">\r\n          <a (click)=\"download(xsd)\" class=\"learn-more\">Download {{xsd.name}}</a>\r\n          <BR/>\r\n        </div>\r\n      </div>\r\n      <BR/>\r\n      <BR/>\r\n      If you have any questions or comments please find contact informations on the official <a href=\"http://maritimecloud.net\" class=\"learn-more\" target=\"_blank\">Maritime Cloud Homepage</a>\r\n    </ba-card>\r\n  </div>\r\n</div>\r\n"
+module.exports = "<div class=\"row\">\r\n  <div class=\"col-lg-12\">\r\n    <ba-card title=\"Service Registry - How to?\" baCardClass=\"with-scroll table-panel\">\r\n      <h5 style=\"margin-bottom: 2px;\">Guide on how to make services for the Maritime Cloud - Concepts and how to:</h5>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Documentation_Guidelines.pdf\" class=\"learn-more\" target=\"_blank\">Service Specification Guideline</a>\r\n\r\n      <h5 style=\"margin-bottom: 2px; margin-top: 15px\">TEMPLATES:</h5>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Specification_Template.docx\" class=\"learn-more\" target=\"_blank\">Download Specification template</a>\r\n      <BR/>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Design_Description_Template.docx\" class=\"learn-more\" target=\"_blank\">Download Technical Design template</a>\r\n      <BR/>\r\n      <a href=\"http://maritimecloud.net/docs/Service_Instance_Description_Template.docx\" class=\"learn-more\" target=\"_blank\">Download Instance template</a>\r\n      <div *ngIf=\"xsds && xsds.length>0\">\r\n        <h5 style=\"margin-bottom: 2px; margin-top: 15px\">XSDs:</h5>\r\n        <div *ngFor=\"let xsd of xsds\">\r\n          <a (click)=\"download(xsd)\" class=\"learn-more\">Download {{xsd.name}}</a>\r\n          <BR/>\r\n        </div>\r\n      </div>\r\n      <BR/>\r\n      <BR/>\r\n      If you have any questions or comments please find contact informations on the official <a href=\"http://maritimecloud.net\" class=\"learn-more\" target=\"_blank\">Maritime Cloud Homepage</a>\r\n    </ba-card>\r\n  </div>\r\n</div>\r\n"
 
 /***/ },
 
