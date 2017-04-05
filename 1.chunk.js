@@ -3630,7 +3630,7 @@ var CertificatesTableComponent = (function () {
         return this.authService.authState.isAdmin();
     };
     CertificatesTableComponent.prototype.revoke = function (certificate) {
-        this.navigationHelper.navigateToRevokeCertificate(this.certificateEntityType, this.entityMrn, this.certificateTitle, certificate.id);
+        this.navigationHelper.navigateToRevokeCertificate(this.certificateEntityType, this.entityMrn, this.certificateTitle, certificate.serialNumber);
     };
     CertificatesTableComponent.prototype.download = function (certificate) {
         var pemCertificate = { certificate: certificate.certificate };
