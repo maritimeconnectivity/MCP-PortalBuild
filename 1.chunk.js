@@ -2666,7 +2666,7 @@ var SpecificationDetailsComponent = (function () {
         var specificationId = this.route.snapshot.params['id'];
         var version = this.route.snapshot.queryParams['specificationVersion'];
         this.loadSpecification(specificationId, version);
-        this.loadEndorsements(specificationId);
+        //  this.loadEndorsements(specificationId);
     };
     SpecificationDetailsComponent.prototype.downloadXml = function () {
         this.fileHelperService.downloadXml(this.specification.specAsXml);
