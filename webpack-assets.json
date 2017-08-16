@@ -1,17 +1,9 @@
 {
   "main": {
-<<<<<<< HEAD
     "js": "main.b82b5fafc95c8959bc40.bundle.js",
     "css": "initial.css"
   },
   "polyfills": {
     "js": "polyfills.b82b5fafc95c8959bc40.bundle.js"
-=======
-    "js": "main.c2f8635efd778a0e9b9e.bundle.js",
-    "css": "initial.css"
-  },
-  "polyfills": {
-    "js": "polyfills.c2f8635efd778a0e9b9e.bundle.js"
->>>>>>> origin/staging
   }
 }
