@@ -1,9 +1,9 @@
 {
   "main": {
-    "js": "main.7b6ef91d2de18aab06b7.bundle.js",
+    "js": "main.2d2d73565ed70a6cfdd8.bundle.js",
     "css": "initial.css"
   },
   "polyfills": {
-    "js": "polyfills.7b6ef91d2de18aab06b7.bundle.js"
+    "js": "polyfills.2d2d73565ed70a6cfdd8.bundle.js"
   }
 }
