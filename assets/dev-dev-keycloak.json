@@ -1,5 +1,5 @@
 {
-  "realm": "MaritimeCloud",
+  "realm": "MCP",
   "auth-server-url": "http://localhost:8080/auth",
   "ssl-required": "none",
   "resource": "MaritimeCloudPortal",
